@@ -36,12 +36,17 @@ void closeShutter() {
     digitalWrite(shutterPin, LOW);
 }
 
+void triggerShutter() {
+    Serial.print("Trigger shutter");
+    openShutter();
+    delay(100);
+    closeShutter();
+}
+
 void handlePysicalTrigger() {
     switchState = digitalRead(switchPin);
     if (switchState == HIGH ) {
-        openShutter();
-        delay(100);
-        closeShutter();
+        triggerShutter();
     }
 }
 
@@ -61,7 +66,7 @@ void handleDigitalTriggers() {
                 digitalWrite(led_pin_1, value); // Indicate in led
                 if(value == 1) // check if the button is switched on
                     timestampButton1 = now; // if button is switched on, write the current time to the timestamp
-                openShutter();
+                triggerShutter();
                 break;
             case 2:
                 Serial.print("Button 2:");
@@ -79,7 +84,6 @@ void handleDigitalTriggers() {
         digitalWrite(led_pin_1, 0); // set output port to 0
         ESP_BT.write(10); // send byte to phone indicateding that Button 1 is to be set to 0 -> 10
         Serial.print("Button 1 timeout - value: 0"); // write to serial port for easy debugging
-        closeShutter();
     }
 }
 
