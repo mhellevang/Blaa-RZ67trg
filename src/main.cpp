@@ -10,9 +10,7 @@ int incoming;
 unsigned long now;
 unsigned long timestampButton1;
 
-const int switchPin = 36;
-const int shutterPin = 32;
-int switchState = 0;
+const int shutterPin = 23;
 
 BluetoothSerial ESP_BT;
 
@@ -25,7 +23,6 @@ void setup() {
 
     // Physical buttons on breadboard / device
     pinMode(shutterPin, OUTPUT);
-    pinMode(switchPin, INPUT);
 }
 
 void openShutter() {
@@ -37,17 +34,10 @@ void closeShutter() {
 }
 
 void triggerShutter() {
-    Serial.print("Trigger shutter");
+    Serial.println("Trigger shutter");
     openShutter();
     delay(100);
     closeShutter();
-}
-
-void handlePysicalTrigger() {
-    switchState = digitalRead(switchPin);
-    if (switchState == HIGH ) {
-        triggerShutter();
-    }
 }
 
 void handleDigitalTriggers() {
@@ -89,6 +79,5 @@ void handleDigitalTriggers() {
 
 void loop() {
     handleDigitalTriggers();
-    handlePysicalTrigger();
 }
 
