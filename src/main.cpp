@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include "BluetoothSerial.h"
 
-// the delay between button on and button off
-#define DELAY 1000
-
-int led_pin_1 = 4; // TTGO-Display led
+#define DELAY 2000
+#define BLINK_SPEED 500
 
 int incoming;
+int ledPin = 2; // Built in LED on ESP32 dev board
+
 unsigned long now;
-unsigned long timestampButton1;
+unsigned long timestampButton;
+unsigned long timestampButton2;
 
 const int shutterPin = 23;
 
@@ -18,10 +19,7 @@ void setup() {
     Serial.begin(19200);
     ESP_BT.begin("RZ67 Blaa");
 
-    // Digital buttons from app
-    pinMode(led_pin_1, OUTPUT);
-
-    // Physical buttons on breadboard / device
+    pinMode(ledPin, OUTPUT);
     pinMode(shutterPin, OUTPUT);
 }
 
@@ -40,7 +38,7 @@ void triggerShutter() {
     closeShutter();
 }
 
-void handleDigitalTriggers() {
+void loop() {
     now = millis(); // Store current time
     if (ESP_BT.available()) {
         incoming = ESP_BT.read(); //Read what we receive
@@ -53,14 +51,23 @@ void handleDigitalTriggers() {
             case 1:
                 Serial.print("Button 1:");
                 Serial.println(value);
-                digitalWrite(led_pin_1, value); // Indicate in led
-                if(value == 1) // check if the button is switched on
-                    timestampButton1 = now; // if button is switched on, write the current time to the timestamp
+                if (value == 1) {
+                    digitalWrite(ledPin, HIGH);
+                    timestampButton = now;
+                } else {
+                    digitalWrite(ledPin, LOW);
+                }
                 triggerShutter();
                 break;
             case 2:
                 Serial.print("Button 2:");
                 Serial.println(value);
+                if (value == 1) {
+                    digitalWrite(ledPin, HIGH);
+                    timestampButton2 = now;
+                } else {
+                    digitalWrite(ledPin, LOW);
+                }
                 break;
             case 3:
                 Serial.print("Button 3:");
@@ -69,15 +76,17 @@ void handleDigitalTriggers() {
         }
     }
 
-    // time-out check -> check if a button is on and whether it needs to be switched off
-    if(digitalRead(led_pin_1) and now > timestampButton1 + DELAY) { // if output port (led_pin_1) is active and if the delay time has passed, the button is to be switched off
-        digitalWrite(led_pin_1, 0); // set output port to 0
+    if (incoming == 11 and digitalRead(ledPin) and now > timestampButton + DELAY) {
+        // if output port (ledPin) is active and if the delay time has passed, the button is to be switched off
+        // time-out check -> check if a button is on and whether it needs to be switched off
+        digitalWrite(ledPin, LOW);
         ESP_BT.write(10); // send byte to phone indicateding that Button 1 is to be set to 0 -> 10
         Serial.print("Button 1 timeout - value: 0"); // write to serial port for easy debugging
+    } else if (incoming == 21 and now > timestampButton2 + BLINK_SPEED) {
+        digitalWrite(ledPin, !digitalRead(ledPin));
+        timestampButton2 = now;
+        Serial.println("Button 2 timeout - if 2"); // write to serial port for easy debugging
     }
 }
 
-void loop() {
-    handleDigitalTriggers();
-}
 
