@@ -54,7 +54,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
         switch (button) {
             case 1:
-                Serial.print("Button 1:");
+                Serial.print("Button 1, value = ");
                 Serial.println(value);
                 if (value == 1) {
                     digitalWrite(ledPin, HIGH);
@@ -65,7 +65,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 triggerShutter();
                 break;
             case 2:
-                Serial.print("Button 2:");
+                Serial.print("Button 2, value = ");
                 Serial.println(value);
                 if (value == 1) {
                     digitalWrite(ledPin, HIGH);
@@ -74,17 +74,13 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                     digitalWrite(ledPin, LOW);
                 }
                 break;
-            case 3:
-                Serial.print("Button 3:");
-                Serial.println(value);
-                break;
         }
     }
 };
 
 void setup() {
     Serial.begin(19200);
-    Serial.println("Starting BLE work!");
+    Serial.println("Hello from RZ67 Blaa!");
 
     BLEDevice::init("RZ67 Blaa");
     BLEServer *pServer = BLEDevice::createServer();
@@ -118,18 +114,14 @@ void loop() {
     now = millis(); // Store current time
 
     if (incoming == 11 and digitalRead(ledPin) and now > timestampButton + DELAY) {
-        // if output port (ledPin) is active and if the delay time has passed, the button is to be switched off
-        // time-out check -> check if a button is on and whether it needs to be switched off
+        // Shutter has fired, disable LED
         digitalWrite(ledPin, LOW);
-
-        // TODO ESP_BT.write(10); // send byte to phone indicateding that Button 1 is to be set to 0 -> 10
-
-        Serial.println("Button 1 timeout - value: 0"); // write to serial port for easy debugging
+        Serial.println("Button 1 timeout reached");
     } else if (incoming == 21 and now > timestampButton2 + BLINK_SPEED) {
-        // Blink LED to indicate that button 2 is pressed (countdown)
+        // Blink LED to indicate countdown
         digitalWrite(ledPin, !digitalRead(ledPin));
         timestampButton2 = now;
-        Serial.println("Button 2 timeout - if 2"); // write to serial port for easy debugging
+        Serial.println("Button 2: Blink LED");
     }
 }
 
