@@ -16,7 +16,9 @@ unsigned long now;
 unsigned long timestampButton;
 unsigned long timestampButton2;
 
+BLEServer *pServer = nullptr;
 bool deviceConnected = false;
+bool oldDeviceConnected = false;
 
 void openShutter() {
     digitalWrite(shutterPin, HIGH);
@@ -34,20 +36,22 @@ void triggerShutter() {
 }
 
 class MyServerCallbacks : public BLEServerCallbacks {
-    void onConnect(BLEServer *pServer) {
+    void onConnect(BLEServer *pServer) override {
         deviceConnected = true;
     };
 
-    void onDisconnect(BLEServer *pServer) {
+    void onDisconnect(BLEServer *pServer) override {
         deviceConnected = false;
     };
 
 };
 
 class MyCallbacks : public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {
+    void onWrite(BLECharacteristic *pCharacteristic) override {
         now = millis(); // Store current time
-        incoming = atoi(pCharacteristic->getValue().c_str());
+        incoming = pCharacteristic->getData()[0];
+        Serial.print("Incoming = ");
+        Serial.println(incoming);
 
         int button = floor(incoming / 10);
         int value = incoming % 10;
@@ -78,19 +82,36 @@ class MyCallbacks : public BLECharacteristicCallbacks {
     }
 };
 
+void checkToReconnect() //added
+{
+    // disconnected so advertise
+    if (!deviceConnected && oldDeviceConnected) {
+        delay(500); // give the bluetooth stack the chance to get things ready
+        pServer->startAdvertising(); // restart advertising
+        Serial.println("Disconnected: start advertising");
+        oldDeviceConnected = deviceConnected;
+    }
+    // connected so reset boolean control
+    if (deviceConnected && !oldDeviceConnected) {
+        // do stuff here on connecting
+        Serial.println("Reconnected");
+        oldDeviceConnected = deviceConnected;
+    }
+}
+
 void setup() {
     Serial.begin(19200);
     Serial.println("Hello from RZ67 Blaa!");
 
     BLEDevice::init("RZ67 Blaa");
-    BLEServer *pServer = BLEDevice::createServer();
+    pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
 
     BLEService *pService = pServer->createService(SERVICE_UUID);
     BLECharacteristic *pCharacteristic = pService->createCharacteristic(
             CHARACTERISTIC_UUID,
             BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE
+            BLECharacteristic::PROPERTY_WRITE_NR
     );
     pCharacteristic->setCallbacks(new MyCallbacks());
 
@@ -111,17 +132,21 @@ void setup() {
 
 
 void loop() {
-    now = millis(); // Store current time
 
-    if (incoming == 11 and digitalRead(ledPin) and now > timestampButton + DELAY) {
-        // Shutter has fired, disable LED
-        digitalWrite(ledPin, LOW);
-        Serial.println("Button 1 timeout reached");
-    } else if (incoming == 21 and now > timestampButton2 + BLINK_SPEED) {
-        // Blink LED to indicate countdown
-        digitalWrite(ledPin, !digitalRead(ledPin));
-        timestampButton2 = now;
-        Serial.println("Button 2: Blink LED");
+    checkToReconnect();
+
+    if (deviceConnected) {
+        now = millis(); // Store current time
+
+        if (incoming == 11 and digitalRead(ledPin) and now > timestampButton + DELAY) {
+            // Shutter has fired, disable LED
+            digitalWrite(ledPin, LOW);
+            Serial.println("Button 1 timeout reached");
+        } else if (incoming == 21 and now > timestampButton2 + BLINK_SPEED) {
+            // Blink LED to indicate countdown
+            digitalWrite(ledPin, !digitalRead(ledPin));
+            timestampButton2 = now;
+            Serial.println("Button 2: Blink LED");
+        }
     }
 }
-
