@@ -10,6 +10,7 @@ The [Mamiya RZ67](https://en.wikipedia.org/wiki/Mamiya_RZ67) is a great analog m
 first made in 1982. It's the pinnacle of medium format studio cameras. 
 
 ![Photo of Mamiya RZ67](assets/Mamiya_RZ67_Professional_and_a_Fujifilm_color_120_format_roll_film_(60_mm_wide).jpg)
+*Photo by Thomas Claveirole from Paris, France, CC BY-SA 2.0 <https://creativecommons.org/licenses/by-sa/2.0>, via Wikimedia Commons*
 
 # How do I get my own device?
 
