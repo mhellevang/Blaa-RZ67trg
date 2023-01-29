@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
+#include <SPI.h>
+#include <TinyPICO.h>
 
 #define SERVICE_UUID        "c9239c9e-6fc9-4168-b3aa-53105eb990b0"
 #define CHARACTERISTIC_UUID "458d4dc9-349f-401d-b092-a2b1c55f5319"
@@ -8,8 +10,10 @@
 #define DELAY 2000
 #define BLINK_SPEED 500
 
-const int ledPin = 2; // Built in LED on ESP32 dev board
-const int shutterPin = 23; // Pin for trigger
+const int ledPin = 18; // Built in LED on ESP32 dev board
+const int shutterPin = 5; // Pin for trigger
+
+TinyPICO tp = TinyPICO();
 
 int incoming;
 unsigned long now;
@@ -62,8 +66,10 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 Serial.println(value);
                 if (value == 1) {
                     digitalWrite(ledPin, HIGH);
+                    tp.DotStar_CycleColor(25);
                     timestampButton = now;
                 } else {
+                    tp.DotStar_Clear();
                     digitalWrite(ledPin, LOW);
                 }
                 triggerShutter();
@@ -73,6 +79,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 Serial.println(value);
                 if (value == 1) {
                     digitalWrite(ledPin, HIGH);
+                    tp.DotStar_CycleColor(25);
                     timestampButton2 = now;
                 } else {
                     digitalWrite(ledPin, LOW);
@@ -141,10 +148,12 @@ void loop() {
         if (incoming == 11 and digitalRead(ledPin) and now > timestampButton + DELAY) {
             // Shutter has fired, disable LED
             digitalWrite(ledPin, LOW);
+            tp.DotStar_Clear();
             Serial.println("Button 1 timeout reached");
         } else if (incoming == 21 and now > timestampButton2 + BLINK_SPEED) {
             // Blink LED to indicate countdown
             digitalWrite(ledPin, !digitalRead(ledPin));
+            // Dotstart todo
             timestampButton2 = now;
             Serial.println("Button 2: Blink LED");
         }
