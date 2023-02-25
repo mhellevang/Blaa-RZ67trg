@@ -8,8 +8,8 @@
 #define DELAY 2000
 #define BLINK_SPEED 500
 
-const int ledPin = 9; // Built in LED on ESP32 dev board
-const int shutterPin = D0; // Pin for trigger
+const int ledPin = D9; 
+const int shutterPin = D6; // Pin for trigger
 
 int incoming;
 unsigned long now;
