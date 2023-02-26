@@ -1,8 +1,8 @@
-# RZ67 ESP32 Trigger
+# Blaa-RZ67trg
 
-A ESP32 project for triggering the Mamiya RZ67 analog camera electronically from a bluetooth client.
+Blaa-RZ67trg is a arduino compatible project made for enabling remote triggering of the Mamiya RZ67 analog camera from an app. Blaa-RZ67trg is made to run on a small ESP32 device (in this case Seeed XIAO ESP32C3) that is connected to the electrical input pins on the Mamiya RZ67 camera.
 
-There is also an android app for controlling the device, see [Android Blaa RZ67](https://github.com/mhellevang/Android-Blaa-RZ67).
+There is also an android app made for communication with Blaa-RZ67trg, see [Android Blaa RZ67](https://github.com/mhellevang/Android-Blaa-RZ67).
 
 # What is the Mamiya RZ67?
 
@@ -20,31 +20,22 @@ I'll publish my recommendations for making your own device once I've made a prot
 
 ## Hardware
 
-* 1x ESP32 to receive the bluetooth commands and trigger the camera
+* 1x Seeed XIAO ESP32C3 (or similar ESP32 device with BLE) to receive the bluetooth commands and trigger the camera
 * 1x IRF520 MOSFET (or similar) to control the shutter release
-* 1x 4P 2.54mm pitch dupont connector for the shutter cable
 * Wires
-* Battery (optional) TBD
+* Battery or other power source (LiPo, USP-C) 
 
 ## Camera connection
 
-The camera has four pins for the shutter release. The pins are labeled as follows (left to right):
+The camera has a four pin IO port in front. The pins are labeled as follows (left to right):
 
-* 1: 6v. We don't need it for this project.
-* 2: Ground
+* 1: 6v. Can be ignored, we don't need it for this project.
+* 2: GND (Ground)
 * 3: S1 switch
 * 4: S2 switch
 
-To trigger the shutter release, we need to connect the S1 and S2 pins together.
-We'll use a MOSFET to connect S1 and S2. The MOSFET will be controlled by the ESP32.
+To trigger the shutter release from the ESP32, we need to connect GND, S1 and S2 via the MOSFET.
 
 ## Wiring
 
-* ESP32 pin 32 to IRF520 gate (trigger signal)
-* ESP32 pin GND to IRF520 source (ground)
-* Dupont 4 port connector should be wired as follows:
-    * Port 1: Not neaded. Leave it empty
-    * Port 2: IRF520 gate
-    * Port 3: IRF520 drain
-    * Port 4: IRF520 source
-
+Schematics TBD 
