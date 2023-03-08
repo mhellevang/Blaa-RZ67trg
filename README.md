@@ -38,5 +38,4 @@ To trigger the shutter release from the ESP32, we need to connect GND, S1 and S2
 
 ## Wiring
 
-![Fritzing schematics](assets/RZ67 Seeed XIAO ESP32C3_bb.png)
-
+![Schematics](assets/RZ67_Seeed_XIAO_ESP32C3_bb.png)
