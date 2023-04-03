@@ -8,7 +8,7 @@
 #define DELAY 2000
 #define BLINK_SPEED 500
 
-const int ledPin = D9; 
+const int ledPin = D7; 
 const int shutterPin = D6; // Pin for trigger
 
 int incoming;
